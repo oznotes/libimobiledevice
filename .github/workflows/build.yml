@@ -26,28 +26,28 @@ jobs:
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libplist-latest_i686-mingw32
+          name: libplist-latest_i686-windows
           repo: libimobiledevice/libplist
       - name: fetch libusbmuxd
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libusbmuxd-latest_i686-mingw32
+          name: libusbmuxd-latest_i686-windows
           repo: libimobiledevice/libusbmuxd
       - name: fetch libimobiledevice-glue
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libimobiledevice-glue-latest_i686-mingw32
+          name: libimobiledevice-glue-latest_i686-windows
           repo: libimobiledevice/libimobiledevice-glue
       - name: fetch libtatsu
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libtatsu-latest_i686-mingw32
+          name: libtatsu-latest_i686-windows
           repo: libimobiledevice/libtatsu
       - name: install external dependencies
         run: |
