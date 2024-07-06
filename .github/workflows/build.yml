@@ -139,6 +139,7 @@ jobs:
         run: make install
       - name: copy DLLs
         run: |
+          mkdir -p dest/bin
           cp /mingw32/bin/*.dll ./dest/bin/
       - name: prepare artifact
         run: |
