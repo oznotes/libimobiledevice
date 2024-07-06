@@ -139,13 +139,13 @@ jobs:
         run: make install
       - name: copy DLLs
         run: |
-          mkdir -p dest/bin
-          cp /mingw32/bin/*.dll ./dest/bin/
+          mkdir -p dest/mingw32/bin
+          cp /mingw32/bin/*.dll ./dest/mingw32/bin/
       - name: prepare artifact
         run: |
           mkdir -p dest
           DESTDIR=`pwd`/dest make install
-          tar -C dest -cf libimobiledevice.tar i686-mingw32
+          tar -C dest -cf libimobiledevice.tar mingw32
       - name: publish artifact
         uses: actions/upload-artifact@v4
         with:
