@@ -193,28 +193,28 @@ jobs:
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libplist-latest_windows
+          name: libplist-latest_${{env.target_triplet}}
           repo: libimobiledevice/libplist
       - name: fetch libusbmuxd
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libusbmuxd-latest_windows
+          name: libusbmuxd-latest_${{env.target_triplet}}
           repo: libimobiledevice/libusbmuxd
       - name: fetch libimobiledevice-glue
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libimobiledevice-glue-latest_windows
+          name: libimobiledevice-glue-latest_${{env.target_triplet}}
           repo: libimobiledevice/libimobiledevice-glue
       - name: fetch libtatsu
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libtatsu-latest_windows
+          name: libtatsu-latest_${{env.target_triplet}}
           repo: libimobiledevice/libtatsu
       - name: install external dependencies
         run: |
