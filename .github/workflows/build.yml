@@ -53,7 +53,7 @@ jobs:
         run: |
           mkdir extract
           Get-ChildItem *.tar | ForEach-Object { tar -C extract -xvf $_.Name }
-          Copy-Item -Recurse extract\* -Destination C:\
+          Copy-Item -Recurse -Force extract\* -Destination C:\
       - name: autogen
         run: ./autogen.sh CC=cl CXX=cl --enable-debug
       - name: make
