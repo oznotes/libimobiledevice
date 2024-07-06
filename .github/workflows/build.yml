@@ -6,68 +6,147 @@ on:
     - cron: '0 0 1 * *'
 
 jobs:
-  build-windows:
-    runs-on: windows-2019
+  build-linux-ubuntu:
+    runs-on: ubuntu-latest
     steps:
-      - name: Setup Visual Studio
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '6.0.x'
-      - uses: actions/checkout@v4
       - name: install dependencies
         run: |
-          choco install make autoconf automake libtool
+          sudo apt-get update
           pip install cython
       - name: prepare environment
         run: |
-          echo "target_triplet=i686-windows" >> $GITHUB_ENV
+          echo "target_triplet=`gcc -dumpmachine`" >> $GITHUB_ENV
       - name: fetch libplist
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libplist-latest_i686-windows
+          name: libplist-latest_${{env.target_triplet}}
           repo: libimobiledevice/libplist
       - name: fetch libusbmuxd
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libusbmuxd-latest_i686-windows
+          name: libusbmuxd-latest_${{env.target_triplet}}
           repo: libimobiledevice/libusbmuxd
       - name: fetch libimobiledevice-glue
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libimobiledevice-glue-latest_i686-windows
+          name: libimobiledevice-glue-latest_${{env.target_triplet}}
           repo: libimobiledevice/libimobiledevice-glue
       - name: fetch libtatsu
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libtatsu-latest_i686-windows
+          name: libtatsu-latest_${{env.target_triplet}}
           repo: libimobiledevice/libtatsu
       - name: install external dependencies
         run: |
           mkdir extract
-          Get-ChildItem *.tar | ForEach-Object { tar -C extract -xvf $_.Name }
-          Copy-Item -Recurse -Force extract\* -Destination C:\
+          for I in *.tar; do
+            tar -C extract -xvf $I
+          done
+          sudo cp -r extract/* /
+          sudo ldconfig
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: autogen
-        run: ./autogen.sh CC=cl CXX=cl --enable-debug
+        run: ./autogen.sh PKG_CONFIG_PATH=/usr/local/lib/pkgconfig LDFLAGS="-Wl,-rpath=/usr/local/lib" --enable-debug
+      - name: make
+        run: make
+      - name: make install
+        run: sudo make install
+      - name: prepare artifact
+        run: |
+          mkdir -p dest
+          DESTDIR=`pwd`/dest make install
+          tar -C dest -cf libimobiledevice.tar usr
+      - name: publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libimobiledevice-latest_${{env.target_triplet}}
+          path: libimobiledevice.tar
+
+  build-windows:
+    runs-on: windows-2019
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW32
+          release: false
+          update: false
+          install: >-
+            base-devel
+            git
+            mingw-w64-i686-gcc
+            make
+            libtool
+            autoconf
+            automake-wrapper
+      - name: prepare environment
+        run: |
+          echo "target_triplet=`gcc -dumpmachine`" >> $GITHUB_ENV
+          git config --global core.autocrlf false
+      - name: fetch libplist
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: build.yml
+          name: libplist-latest_i686-mingw32
+          repo: libimobiledevice/libplist
+      - name: fetch libusbmuxd
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: build.yml
+          name: libusbmuxd-latest_i686-mingw32
+          repo: libimobiledevice/libusbmuxd
+      - name: fetch libimobiledevice-glue
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: build.yml
+          name: libimobiledevice-glue-latest_i686-mingw32
+          repo: libimobiledevice/libimobiledevice-glue
+      - name: fetch libtatsu
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: build.yml
+          name: libtatsu-latest_i686-mingw32
+          repo: libimobiledevice/libtatsu
+      - name: install external dependencies
+        run: |
+          mkdir extract
+          for I in *.tar; do
+            tar -C extract -xvf $I
+          done
+          cp -r extract/* /
+      - uses: actions/checkout@v4
+      - name: autogen
+        run: ./autogen.sh CC=gcc CXX=g++ --enable-debug
       - name: make
         run: make
       - name: make install
         run: make install
+      - name: copy DLLs
+        run: |
+          cp /mingw32/bin/*.dll ./dest/bin/
       - name: prepare artifact
         run: |
           mkdir -p dest
-          $env:DESTDIR = (Get-Location).Path + "\dest"
-          make install DESTDIR=$env:DESTDIR
-          tar -C dest -cf libimobiledevice.tar windows
+          DESTDIR=`pwd`/dest make install
+          tar -C dest -cf libimobiledevice.tar i686-mingw32
       - name: publish artifact
         uses: actions/upload-artifact@v4
         with:
-          name: libimobiledevice-latest_windows
+          name: libimobiledevice-latest_i686-mingw32
           path: libimobiledevice.tar
