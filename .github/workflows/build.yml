@@ -52,10 +52,8 @@ jobs:
       - name: install external dependencies
         run: |
           mkdir extract
-          for I in *.tar; do
-            tar -C extract -xvf $I
-          done
-          cp -r extract/* /
+          Get-ChildItem *.tar | ForEach-Object { tar -C extract -xvf $_.Name }
+          Copy-Item -Recurse extract\* -Destination C:\
       - name: autogen
         run: ./autogen.sh CC=cl CXX=cl --enable-debug
       - name: make
@@ -65,7 +63,8 @@ jobs:
       - name: prepare artifact
         run: |
           mkdir -p dest
-          DESTDIR=`pwd`/dest make install
+          $env:DESTDIR = (Get-Location).Path + "\dest"
+          make install DESTDIR=$env:DESTDIR
           tar -C dest -cf libimobiledevice.tar windows
       - name: publish artifact
         uses: actions/upload-artifact@v4
