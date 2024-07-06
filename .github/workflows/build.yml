@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - name: Setup Visual Studio
         uses: actions/setup-dotnet@v3
@@ -20,34 +20,34 @@ jobs:
           pip install cython
       - name: prepare environment
         run: |
-          echo "target_triplet=x86_64-windows" >> $GITHUB_ENV
+          echo "target_triplet=i686-windows" >> $GITHUB_ENV
       - name: fetch libplist
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libplist-latest_x86_64-windows
+          name: libplist-latest_i686-mingw32
           repo: libimobiledevice/libplist
       - name: fetch libusbmuxd
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libusbmuxd-latest_x86_64-windows
+          name: libusbmuxd-latest_i686-mingw32
           repo: libimobiledevice/libusbmuxd
       - name: fetch libimobiledevice-glue
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libimobiledevice-glue-latest_x86_64-windows
+          name: libimobiledevice-glue-latest_i686-mingw32
           repo: libimobiledevice/libimobiledevice-glue
       - name: fetch libtatsu
         uses: dawidd6/action-download-artifact@v3
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build.yml
-          name: libtatsu-latest_x86_64-windows
+          name: libtatsu-latest_i686-mingw32
           repo: libimobiledevice/libtatsu
       - name: install external dependencies
         run: |
